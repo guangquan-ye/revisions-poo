@@ -1,0 +1,153 @@
+<?php
+
+require_once '../job-03/dbConnect.php';
+require_once 'Category.php';
+
+class Product {
+
+    private $db;
+
+    private ?int $id;
+    private ?string $name;
+    private ?int $category_id;
+    private ?array $photos;
+    private ?int $price;
+    private ?string $description;
+    private ?int $quantity;
+    private ?DateTime $createdAt;
+    private ?DateTime $updatedAt;
+
+    public function __construct($id=null, $name=null, $category_id=null, $photos=null, $price=null, $description=null, $quantity=null, $createdAt=null, $updatedAt=null) {
+
+        $this->db = DbConnect::getInstance()->getConnection();
+        
+        $this->id = $id;
+        $this->name = $name;
+        $this->category_id = $category_id;
+        $this->photos = $photos;
+        $this->price = $price;
+        $this->description = $description;
+        $this->quantity = $quantity;
+        $this->createdAt = $createdAt ? new DateTime($createdAt) : null;
+        $this->updatedAt = $updatedAt ? new DateTime($updatedAt) : null;
+
+    }
+
+    public function findOneById(int $id) {
+        $query = "SELECT * FROM product WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['id' => $id]); 
+        $productInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$productInfo) {
+            return false;
+        }
+
+        return new Product(
+            $productInfo['id'],
+            $productInfo['name'],
+            $productInfo['category_id'],
+            [$productInfo['photos']],
+            $productInfo['price'],
+            $productInfo['description'],
+            $productInfo['quantity'],
+            $productInfo['createdAt'],
+            $productInfo['updatedAt']
+        );
+    }
+
+    public function getCategory(){
+        $query = "SELECT * FROM category WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['id' => $this->category_id]);
+        $categoryInfo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $category = new Category($categoryInfo['id'], $categoryInfo['name'], $categoryInfo['description'], $categoryInfo['createdAt'], $categoryInfo['updatedAt']);
+
+        return $category;
+    }
+
+    public function createProduct($id, $name, $price, $description, $quantity) {
+        $query = "INSERT INTO product (id, name, photos, price, description, quantity, createdAt, updatedAt ) VALUES ( :id, :name, NULL, :price, :description, :quantity, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute(['id'=> $id, 'name' => $name, 'price' => $price, 'description' => $description, 'quantity' => $quantity,]);
+        return $this->db->lastInsertId();
+    }
+
+    public function getId() {
+        return $this->id;
+    }
+
+    public function setId($id) {
+        return $this->id = $id;
+    }
+
+    public function getName() {
+        return $this->name;
+    }
+
+    public function setName($name) {
+        return $this->name = $name;
+    }
+
+    public function getCategory_id() {
+        return $this->category_id;
+    }
+
+    public function setCategory_id($category_id) {
+        return $this->category_id = $category_id;
+    }
+
+    public function getPhoto() {
+        return $this->photos;
+    }
+
+    public function setPhoto($photo) {
+        return $this->photos = $photo;
+    }
+
+    public function getPrice() {
+        return $this->price;
+    }
+
+    public function setPrice($price) {
+        return $this->price = $price;
+    }
+
+    public function getDescription() {
+        return $this->description;
+    }
+
+    public function setDescription($description) {
+        return $this->description = $description;
+    }
+
+    public function getQuantity() {
+        return $this->quantity;
+    }
+
+    public function setQuantity($quantity) {
+        return $this->quantity = $quantity;
+    }
+
+    public function getCreatedAt() {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt($createdAt) {
+        return $this->createdAt = $createdAt;
+    }
+
+    public function getUpdatedAt() {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt($updatedAt) {
+        return $this->updatedAt = $updatedAt;
+    }
+
+
+}
+
+
+?>
